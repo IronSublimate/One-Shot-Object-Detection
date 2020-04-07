@@ -147,8 +147,8 @@ class OneShotBase(nn.Module):
 
         self.RCNN_base = nn.Module()  # implement in inherit class
         self.RCNN_top = nn.Module()  # implement in inherit class
-        self.RCNN_cls_score = nn.Module() # implement in inherit class
-        self.RCNN_bbox_pred = nn.Module() # implement in inherit clas
+        self.RCNN_cls_score = nn.Module()  # implement in inherit class
+        self.RCNN_bbox_pred = nn.Module()  # implement in inherit clas
 
     def forward(self, im_data, query, im_info, gt_boxes, num_boxes):
         batch_size = im_data.size(0)
