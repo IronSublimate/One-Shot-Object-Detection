@@ -119,11 +119,11 @@ class match_block(nn.Module):
         return non_det, act_det, act_aim, c_weight
 
 
-class _fasterRCNN(nn.Module):
+class OneShotBase(nn.Module):
     """ faster RCNN """
 
     def __init__(self, classes, class_agnostic):
-        super(_fasterRCNN, self).__init__()
+        super(OneShotBase, self).__init__()
         self.classes = classes
         self.n_classes = len(classes)
         self.class_agnostic = class_agnostic
@@ -249,6 +249,9 @@ class _fasterRCNN(nn.Module):
         normal_init(self.RCNN_cls_score[0], 0, 0.01, cfg.TRAIN.TRUNCATED)
         normal_init(self.RCNN_cls_score[1], 0, 0.01, cfg.TRAIN.TRUNCATED)
         normal_init(self.RCNN_bbox_pred, 0, 0.001, cfg.TRAIN.TRUNCATED)
+
+    def _init_modules(self):
+        raise NotImplementedError
 
     def create_architecture(self):
         self._init_modules()

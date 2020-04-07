@@ -25,8 +25,8 @@ from model.rpn.bbox_transform import clip_boxes
 from model.roi_layers import nms
 from model.rpn.bbox_transform import bbox_transform_inv
 from model.utils.net_utils import save_net, load_net, vis_detections
-from model.faster_rcnn.vgg16 import vgg16
-from model.faster_rcnn.oneshotobjectdetectionnet import OneShotObjectDetectionNet
+from model.faster_rcnn.oneshotvgg16 import OneShotVGG16
+from model.faster_rcnn.oneshotresnet import OneShotResNet
 
 import pdb
 
@@ -179,13 +179,13 @@ if __name__ == '__main__':
 
     # initilize the network here.
     if args.net == 'vgg16':
-        fasterRCNN = vgg16(imdb_vu.classes, pretrained=False, class_agnostic=args.class_agnostic)
+        fasterRCNN = OneShotVGG16(imdb_vu.classes, pretrained=False, class_agnostic=args.class_agnostic)
     elif args.net == 'res101':
-        fasterRCNN = OneShotObjectDetectionNet(imdb_vu.classes, 101, pretrained=False, class_agnostic=args.class_agnostic)
+        fasterRCNN = OneShotResNet(imdb_vu.classes, 101, pretrained=False, class_agnostic=args.class_agnostic)
     elif args.net == 'res50':
-        fasterRCNN = OneShotObjectDetectionNet(imdb_vu.classes, 50, pretrained=False, class_agnostic=args.class_agnostic)
+        fasterRCNN = OneShotResNet(imdb_vu.classes, 50, pretrained=False, class_agnostic=args.class_agnostic)
     elif args.net == 'res152':
-        fasterRCNN = OneShotObjectDetectionNet(imdb_vu.classes, 152, pretrained=False, class_agnostic=args.class_agnostic)
+        fasterRCNN = OneShotResNet(imdb_vu.classes, 152, pretrained=False, class_agnostic=args.class_agnostic)
     else:
         print("network is not defined")
         pdb.set_trace()

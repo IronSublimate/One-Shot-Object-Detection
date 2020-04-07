@@ -3,7 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 from model.utils.config import cfg
-from model.faster_rcnn.faster_rcnn import _fasterRCNN
+from model.faster_rcnn.oneshotbase import OneShotBase
 
 import torch
 import torch.nn as nn
@@ -219,7 +219,7 @@ def resnet152(pretrained=False):
     return model
 
 
-class OneShotObjectDetectionNet(_fasterRCNN):
+class OneShotResNet(OneShotBase):
     def __init__(self, classes, num_layers=101, pretrained=False, class_agnostic=False):
         if num_layers == 50:
             self.model_path = '../data/pretrain_imagenet_resnet50/model_best.pth.tar'
@@ -230,7 +230,7 @@ class OneShotObjectDetectionNet(_fasterRCNN):
         self.class_agnostic = class_agnostic
         self.num_layers = num_layers
 
-        _fasterRCNN.__init__(self, classes, class_agnostic)
+        OneShotBase.__init__(self, classes, class_agnostic)
 
     def _init_modules(self):
         if self.num_layers == 50:
