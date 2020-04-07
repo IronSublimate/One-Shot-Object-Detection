@@ -31,7 +31,7 @@ from model.utils.net_utils import weights_normal_init, save_net, load_net, \
     adjust_learning_rate, save_checkpoint, clip_gradient
 
 from model.faster_rcnn.vgg16 import vgg16
-from model.faster_rcnn.resnet import resnet
+from model.faster_rcnn.oneshotobjectdetectionnet import OneShotObjectDetectionNet
 
 
 def parse_args():
@@ -234,11 +234,11 @@ if __name__ == '__main__':
     if args.net == 'vgg16':
         fasterRCNN = vgg16(imdb.classes, pretrained=True, class_agnostic=args.class_agnostic)
     elif args.net == 'res101':
-        fasterRCNN = resnet(imdb.classes, 101, pretrained=True, class_agnostic=args.class_agnostic)
+        fasterRCNN = OneShotObjectDetectionNet(imdb.classes, 101, pretrained=True, class_agnostic=args.class_agnostic)
     elif args.net == 'res50':
-        fasterRCNN = resnet(imdb.classes, 50, pretrained=True, class_agnostic=args.class_agnostic)
+        fasterRCNN = OneShotObjectDetectionNet(imdb.classes, 50, pretrained=True, class_agnostic=args.class_agnostic)
     elif args.net == 'res152':
-        fasterRCNN = resnet(imdb.classes, 152, pretrained=True, class_agnostic=args.class_agnostic)
+        fasterRCNN = OneShotObjectDetectionNet(imdb.classes, 152, pretrained=True, class_agnostic=args.class_agnostic)
     else:
         print("network is not defined")
         pdb.set_trace()
