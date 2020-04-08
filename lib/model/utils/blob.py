@@ -8,7 +8,7 @@
 """Blob helper functions."""
 
 import numpy as np
-# from scipy.misc import imread, imresize
+# from imageio import imread, imresize
 import cv2
 
 try:

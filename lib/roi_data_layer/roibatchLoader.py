@@ -11,7 +11,7 @@ from PIL import Image
 import torch
 from collections import Counter
 
-from scipy.misc import imread
+from imageio import imread
 from model.utils.config import cfg
 from roi_data_layer.minibatch import get_minibatch, get_minibatch
 from model.utils.blob import prep_im_for_blob, im_list_to_blob, crop
