@@ -20,6 +20,7 @@ import pdb
 from model.utils.net_utils import _smooth_l1_loss, _crop_pool_layer, _affine_grid_gen, _affine_theta
 from model.utils.net_utils import *
 
+
 class match_block(nn.Module):
     def __init__(self, inplanes):
         super(match_block, self).__init__()
@@ -66,19 +67,14 @@ class match_block(nn.Module):
             nn.Conv2d(self.inter_channels * 2, 1, 1, 1, 0, bias=False),
             nn.ReLU()
         )
-        
+
         self.ChannelGate = ChannelGate(self.in_channels)
         self.globalAvgPool = nn.AdaptiveAvgPool2d(1)
 
-
-        
     def forward(self, detect, aim):
-
-        
 
         batch_size, channels, height_a, width_a = aim.shape
         batch_size, channels, height_d, width_d = detect.shape
-
 
         #####################################find aim image similar object ####################################################
 
@@ -92,8 +88,6 @@ class match_block(nn.Module):
         theta_x = theta_x.permute(0, 2, 1)
 
         phi_x = self.phi(detect).view(batch_size, self.inter_channels, -1)
-
-        
 
         f = torch.matmul(theta_x, phi_x)
 
@@ -124,17 +118,17 @@ class match_block(nn.Module):
 
         return non_det, act_det, act_aim, c_weight
 
-class _fasterRCNN(nn.Module):
+
+class OneShotBase(nn.Module):
     """ faster RCNN """
+
     def __init__(self, classes, class_agnostic):
-        super(_fasterRCNN, self).__init__()
+        super(OneShotBase, self).__init__()
         self.classes = classes
         self.n_classes = len(classes)
         self.class_agnostic = class_agnostic
 
-        
         self.match_net = match_block(self.dout_base_model)
-
 
         # loss
         self.RCNN_loss_cls = 0
@@ -147,9 +141,14 @@ class _fasterRCNN(nn.Module):
         # self.RCNN_roi_pool = _RoIPooling(cfg.POOLING_SIZE, cfg.POOLING_SIZE, 1.0/16.0)
         # self.RCNN_roi_align = RoIAlignAvg(cfg.POOLING_SIZE, cfg.POOLING_SIZE, 1.0/16.0)
 
-        self.RCNN_roi_pool = ROIPool((cfg.POOLING_SIZE, cfg.POOLING_SIZE), 1.0/16.0)
-        self.RCNN_roi_align = ROIAlign((cfg.POOLING_SIZE, cfg.POOLING_SIZE), 1.0/16.0, 0)
-        self.triplet_loss = torch.nn.MarginRankingLoss(margin = cfg.TRAIN.MARGIN)
+        self.RCNN_roi_pool = ROIPool((cfg.POOLING_SIZE, cfg.POOLING_SIZE), 1.0 / 16.0)
+        self.RCNN_roi_align = ROIAlign((cfg.POOLING_SIZE, cfg.POOLING_SIZE), 1.0 / 16.0, 0)
+        self.triplet_loss = torch.nn.MarginRankingLoss(margin=cfg.TRAIN.MARGIN)
+
+        self.RCNN_base = nn.Module()  # implement in inherit class
+        self.RCNN_top = nn.Module()  # implement in inherit class
+        self.RCNN_cls_score = nn.Module()  # implement in inherit class
+        self.RCNN_bbox_pred = nn.Module()  # implement in inherit clas
 
     def forward(self, im_data, query, im_info, gt_boxes, num_boxes):
         batch_size = im_data.size(0)
@@ -164,10 +163,8 @@ class _fasterRCNN(nn.Module):
 
         rpn_feat, act_feat, act_aim, c_weight = self.match_net(detect_feat, query_feat)
 
-
         # feed base feature map tp RPN to obtain rois
         rois, rpn_loss_cls, rpn_loss_bbox = self.RCNN_rpn(rpn_feat, im_info, gt_boxes, num_boxes)
-
 
         # if it is training phrase, then use ground trubut bboxes for refining
         if self.training:
@@ -193,53 +190,46 @@ class _fasterRCNN(nn.Module):
         if cfg.POOLING_MODE == 'align':
             pooled_feat = self.RCNN_roi_align(act_feat, rois.view(-1, 5))
         elif cfg.POOLING_MODE == 'pool':
-            pooled_feat = self.RCNN_roi_pool(act_feat, rois.view(-1,5))
-
+            pooled_feat = self.RCNN_roi_pool(act_feat, rois.view(-1, 5))
 
         # feed pooled features to top model
         pooled_feat = self._head_to_tail(pooled_feat)
-        query_feat  = self._head_to_tail(act_aim)
+        query_feat = self._head_to_tail(act_aim)
 
         # compute bbox offset
         bbox_pred = self.RCNN_bbox_pred(pooled_feat)
 
-
         pooled_feat = pooled_feat.view(batch_size, rois.size(1), -1)
-        query_feat = query_feat.unsqueeze(1).repeat(1,rois.size(1),1)
+        query_feat = query_feat.unsqueeze(1).repeat(1, rois.size(1), 1)
 
-
-        pooled_feat = torch.cat((pooled_feat,query_feat), dim=2).view(-1, 4096)
-
+        pooled_feat = torch.cat((pooled_feat, query_feat), dim=2).view(-1, 4096)
 
         # compute object classification probability
         score = self.RCNN_cls_score(pooled_feat)
 
-        score_prob = F.softmax(score, 1)[:,1]
-
+        score_prob = F.softmax(score, 1)[:, 1]
 
         RCNN_loss_cls = 0
         RCNN_loss_bbox = 0
-        
 
         if self.training:
             # classification loss
-            
+
             score_label = rois_label.view(batch_size, -1).float()
-            gt_map = torch.abs(score_label.unsqueeze(1)-score_label.unsqueeze(-1))
+            gt_map = torch.abs(score_label.unsqueeze(1) - score_label.unsqueeze(-1))
 
             score_prob = score_prob.view(batch_size, -1)
-            pr_map = torch.abs(score_prob.unsqueeze(1)-score_prob.unsqueeze(-1))
-            target = -((gt_map-1)**2) + gt_map
-            
+            pr_map = torch.abs(score_prob.unsqueeze(1) - score_prob.unsqueeze(-1))
+            target = -((gt_map - 1) ** 2) + gt_map
+
             RCNN_loss_cls = F.cross_entropy(score, rois_label)
 
             margin_loss = 3 * self.triplet_loss(pr_map, gt_map, target)
 
             # RCNN_loss_cls = similarity + margin_loss
-    
+
             # bounding box regression L1 loss
             RCNN_loss_bbox = _smooth_l1_loss(bbox_pred, rois_target, rois_inside_ws, rois_outside_ws)
-
 
         cls_prob = score_prob.view(batch_size, rois.size(1), -1)
         bbox_pred = bbox_pred.view(batch_size, rois.size(1), -1)
@@ -253,7 +243,7 @@ class _fasterRCNN(nn.Module):
             """
             # x is a parameter
             if truncated:
-                m.weight.data.normal_().fmod_(2).mul_(stddev).add_(mean) # not a perfect approximation
+                m.weight.data.normal_().fmod_(2).mul_(stddev).add_(mean)  # not a perfect approximation
             else:
                 m.weight.data.normal_(mean, stddev)
                 m.bias.data.zero_()
@@ -264,7 +254,9 @@ class _fasterRCNN(nn.Module):
         normal_init(self.RCNN_cls_score[0], 0, 0.01, cfg.TRAIN.TRUNCATED)
         normal_init(self.RCNN_cls_score[1], 0, 0.01, cfg.TRAIN.TRUNCATED)
         normal_init(self.RCNN_bbox_pred, 0, 0.001, cfg.TRAIN.TRUNCATED)
-        
+
+    def _init_modules(self):
+        raise NotImplementedError
 
     def create_architecture(self):
         self._init_modules()
