@@ -300,7 +300,7 @@ class roibatchLoader(data.Dataset):
 
         # Get image
         path = data['image_path']
-        print(path)
+        # print(path)
         im = imread(path)
 
         if len(im.shape) == 2:
