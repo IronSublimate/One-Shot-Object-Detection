@@ -64,7 +64,7 @@ class COCOeval:
     # Data, paper, and tutorials available at:  http://mscoco.org/
     # Code written by Piotr Dollar and Tsung-Yi Lin, 2015.
     # Licensed under the Simplified BSD License [see coco/license.txt]
-    def __init__(self, cocoGt=None, cocoDt=None):
+    def __init__(self, cocoGt=None, cocoDt=None,iouType = "bbox"):
         '''
         Initialize CocoEval using coco APIs for gt and dt
         :param cocoGt: coco object with ground truth annotations
@@ -85,7 +85,7 @@ class COCOeval:
         if not cocoGt is None:
             self.params.imgIds = sorted(cocoGt.getImgIds())
             self.params.catIds = sorted(cocoGt.getCatIds())
-
+            self.params.iouType = iouType
 
     def _prepare(self):
         '''
@@ -323,7 +323,7 @@ class COCOeval:
                 Na = a0*I0
                 for m, maxDet in enumerate(m_list):
                     E = [self.evalImgs[Nk+Na+i] for i in i_list]
-                    E = filter(None, E)
+                    E = list(filter(None, E))
                     if len(E) == 0:
                         continue
                     dtScores = np.concatenate([e['dtScores'][0:maxDet] for e in E])
@@ -450,3 +450,4 @@ class Params:
         self.areaRng = [ [0**2,1e5**2], [0**2, 32**2], [32**2, 96**2], [96**2, 1e5**2] ]
         self.useSegm = 0
         self.useCats = 1
+        self.iouType = "bbox"
