@@ -16,10 +16,10 @@ import numpy.random as npr
 from imageio import imread
 from model.utils.config import cfg
 from model.utils.blob import prep_im_for_blob, im_list_to_blob
-import pdb
+from typing import Dict, List, Any
 
 
-def get_minibatch(roidb, num_classes):
+def get_minibatch(roidb, num_classes) -> Dict[str, Any]:
     """Given a roidb, construct a minibatch sampled from it."""
     num_images = len(roidb)
     # Sample random scales to use for each image in this batch
