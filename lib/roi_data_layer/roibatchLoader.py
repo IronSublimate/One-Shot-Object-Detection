@@ -88,7 +88,7 @@ class roibatchLoader(data.Dataset):
         self.filter(seen)
         self.probability()
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int):
         index_ratio = int(self.ratio_index[index])
 
         # get the anchor index for current sample index
