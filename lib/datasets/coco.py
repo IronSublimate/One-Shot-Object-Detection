@@ -509,5 +509,5 @@ class customCOCOeval(COCOeval):
             summarize = _summarizeKps
         self.stats = summarize()
 
-    def __str__(self, cass_index=None):
+    def __str__(self, class_index=None):
         self.summarize(class_index)
