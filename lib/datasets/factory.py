@@ -15,6 +15,7 @@ from datasets.pascal_voc import pascal_voc
 from datasets.coco import coco
 from datasets.imagenet import imagenet
 from datasets.vg import vg
+from datasets.imdb import imdb
 
 import numpy as np
 
@@ -61,7 +62,7 @@ for split in ['train', 'val', 'val1', 'val2', 'test']:
         lambda split=split, devkit_path=devkit_path, data_path=data_path: imagenet(split, devkit_path, data_path))
 
 
-def get_imdb(name):
+def get_imdb(name: str) -> imdb:
     """Get an imdb (image database) by name."""
 
     if name not in __sets:

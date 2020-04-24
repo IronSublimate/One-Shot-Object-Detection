@@ -16,6 +16,7 @@ import numpy as np
 import scipy.sparse
 from model.utils.config import cfg
 import pdb
+from typing import Optional, Sequence
 
 ROOT_DIR = osp.join(osp.dirname(__file__), '..', '..')
 
@@ -23,7 +24,7 @@ ROOT_DIR = osp.join(osp.dirname(__file__), '..', '..')
 class imdb(object):
     """Image database."""
 
-    def __init__(self, name, classes=None):
+    def __init__(self, name: str, classes=None):
         self._name = name
         self._num_classes = 0
         if not classes:
@@ -264,3 +265,6 @@ class imdb(object):
     def competition_mode(self, on):
         """Turn competition mode on or off."""
         pass
+
+    def filter(self, seen: int = 1):
+        raise NotImplementedError

@@ -26,7 +26,7 @@ from pycocotools import mask as COCOmask
 
 
 class coco(imdb):
-    def __init__(self, image_set, year):
+    def __init__(self, image_set: str, year: str):
         imdb.__init__(self, 'coco_' + year + '_' + image_set)
         # COCO specific config options
         self.config = {'use_salt': True,
@@ -380,7 +380,7 @@ class coco(imdb):
             self.config['use_salt'] = True
             self.config['cleanup'] = True
 
-    def filter(self, seen=1):
+    def filter(self, seen: int = 1):
 
         # if want to use train_categories, seen = 1
         # if want to use test_categories , seen = 2
