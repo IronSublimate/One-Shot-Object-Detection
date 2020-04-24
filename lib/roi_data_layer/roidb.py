@@ -7,11 +7,13 @@ import datasets
 import numpy as np
 from model.utils.config import cfg
 from datasets.factory import get_imdb
+from datasets.imdb import imdb as imdb_
 import PIL
+from typing import Dict, List, Any, Tuple
 import pdb
 
 
-def prepare_roidb(imdb):
+def prepare_roidb(imdb: imdb_):
     """Enrich the imdb's roidb by adding some derived quantities that
     are useful for training. This function precomputes the maximum
     overlap, taken over ground-truth boxes, between each ROI and
@@ -125,12 +127,12 @@ def test_rank_roidb_ratio(roidb, reserved):
     return ratio_list, ratio_index
 
 
-def combined_roidb(imdb_names: str, training=True, seen=1):
+def combined_roidb(imdb_names: str, training=True, seen=1) -> List[Dict[str, Any]]:
     """
     Combine multiple roidbs
     """
 
-    def get_training_roidb(imdb, training: bool):
+    def get_training_roidb(imdb: imdb_, training: bool) -> List[Dict[str, Any]]:
         """Returns a roidb (Region of Interest database) for use in training."""
         if cfg.TRAIN.USE_FLIPPED and training:
             print('Appending horizontally-flipped training examples...')
@@ -144,7 +146,7 @@ def combined_roidb(imdb_names: str, training=True, seen=1):
 
         return imdb.roidb
 
-    def get_roidb(imdb_name: str, training: bool):
+    def get_roidb(imdb_name: str, training: bool) -> Tuple[imdb_, List[Dict[str, Any]], List[int], List[int]]:
         imdb = get_imdb(imdb_name)
 
         print('Loaded dataset `{:s}` for training'.format(imdb.name))

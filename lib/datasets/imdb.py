@@ -37,6 +37,8 @@ class imdb(object):
         self._roidb_handler = self.default_roidb
         # Use this dict for storing dataset specific config options
         self.config = {}
+        self.inverse_list = []
+        self.cat_data = []
 
     @property
     def name(self):
@@ -267,4 +269,7 @@ class imdb(object):
         pass
 
     def filter(self, seen: int = 1):
+        raise NotImplementedError
+
+    def gt_roidb(self):
         raise NotImplementedError

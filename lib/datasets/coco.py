@@ -7,6 +7,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from typing import Dict, Any, List
+
 from datasets.imdb import imdb
 import datasets.ds_utils as ds_utils
 from model.utils.config import cfg
@@ -147,7 +149,7 @@ class coco(imdb):
             'Path does not exist: {}'.format(image_path)
         return image_path
 
-    def gt_roidb(self):
+    def gt_roidb(self) -> List[Dict[str, Any]]:
         """
         Return the database of ground-truth regions of interest.
         This function loads/saves from/to a cache file to speed up future calls.
