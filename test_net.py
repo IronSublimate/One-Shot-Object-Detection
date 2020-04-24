@@ -174,6 +174,7 @@ if __name__ == '__main__':
     imdb_vu, roidb_vu, ratio_list_vu, ratio_index_vu, query_vu = combined_roidb(args.imdbval_name, False,
                                                                                 seen=args.seen)
     imdb_vu.competition_mode(on=True)
+    cfg.test_categories = imdb_vu.list
     dataset_vu = roibatchLoader(roidb_vu, ratio_list_vu, ratio_index_vu, query_vu, 1, imdb_vu.num_classes,
                                 training=False, seen=args.seen)
 

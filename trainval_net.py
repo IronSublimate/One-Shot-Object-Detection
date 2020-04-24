@@ -198,7 +198,9 @@ if __name__ == '__main__':
     train_size = len(roidb)
     print('{:d} roidb entries'.format(len(roidb)))
     sampler_batch = sampler(train_size, args.batch_size)
+    cfg.train_categories = imdb.list
     dataset = roibatchLoader(roidb, ratio_list, ratio_index, query, args.batch_size, imdb.num_classes, training=True)
+    assert dataset.list == imdb.list, (dataset.list, imdb.list)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size,
                                              sampler=sampler_batch, num_workers=args.num_workers)
 

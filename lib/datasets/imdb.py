@@ -37,6 +37,7 @@ class imdb(object):
         self._roidb_handler = self.default_roidb
         # Use this dict for storing dataset specific config options
         self.config = {}
+        self.list = []
         self.inverse_list = []
         self.cat_data = []
 
