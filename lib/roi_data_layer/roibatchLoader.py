@@ -101,6 +101,7 @@ class roibatchLoader(data.Dataset):
         blobs = get_minibatch(minibatch_db, self._num_classes)
 
         blobs['gt_boxes'] = [x for x in blobs['gt_boxes'] if x[-1] in self.list_ind]
+        assert blobs['gt_boxes'], "gt_boxes is empty"
         blobs['gt_boxes'] = np.array(blobs['gt_boxes']).reshape((-1, 5))
 
         if self.training:
