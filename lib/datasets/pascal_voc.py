@@ -30,9 +30,10 @@ from .voc_eval import voc_eval
 from model.utils.config import cfg
 
 try:
-    xrange          # Python 2
+    xrange  # Python 2
 except NameError:
     xrange = range  # Python 3
+
 
 # <<<< obsolete
 
@@ -138,7 +139,7 @@ class pascal_voc(imdb):
         gt_roidb = [self._load_pascal_annotation(index)
                     for index in self.image_index]
         with open(cache_file, 'wb') as fid:
-            pickle.dump([gt_roidb,self.cat_data], fid, pickle.HIGHEST_PROTOCOL)
+            pickle.dump([gt_roidb, self.cat_data], fid, pickle.HIGHEST_PROTOCOL)
         print('wrote gt roidb to {}'.format(cache_file))
 
         return gt_roidb
@@ -239,11 +240,10 @@ class pascal_voc(imdb):
         for ix, obj in enumerate(objs):
             bbox = obj.find('bndbox')
             # Make pixel indexes 0-based
-            x1 = float(bbox.find('xmin').text) 
-            y1 = float(bbox.find('ymin').text) 
+            x1 = float(bbox.find('xmin').text)
+            y1 = float(bbox.find('ymin').text)
             x2 = float(bbox.find('xmax').text) - 1
             y2 = float(bbox.find('ymax').text) - 1
-
 
             diffc = obj.find('difficult')
             difficult = 0 if diffc == None else int(diffc.text)
@@ -255,9 +255,9 @@ class pascal_voc(imdb):
             overlaps[ix, cls] = 1.0
             seg_areas[ix] = (x2 - x1 + 1) * (y2 - y1 + 1)
             entry = {
-               'boxes': [x1, y1, x2, y2],
-               'image_path': im_path
-               }
+                'boxes': [x1, y1, x2, y2],
+                'image_path': im_path
+            }
             self.cat_data[cls].append(entry)
 
         overlaps = scipy.sparse.csr_matrix(overlaps)
@@ -345,7 +345,7 @@ class pascal_voc(imdb):
         print('Recompute with `./tools/reval.py --matlab ...` for your paper.')
         print('-- Thanks, The Management')
         print('--------------------------------------------------------------')
-        return aps 
+        return aps
 
     def _do_matlab_eval(self, output_dir='output'):
         print('-----------------------------------------------------')
@@ -384,19 +384,17 @@ class pascal_voc(imdb):
             self.config['cleanup'] = True
 
     def filter(self, seen=1):
-        if seen==1:
-            self.list = [2,3,4,5,6,7,9,11,12,13,14,15,16,18,19,20]
-        elif seen==2:
-            self.list = [1,8,10,17]
-        elif seen==3:
-            self.list = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
-        
-        
+        if seen == 1:
+            self.list = [2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 14, 15, 16, 18, 19, 20]
+        elif seen == 2:
+            self.list = [1, 8, 10, 17]
+        elif seen == 3:
+            self.list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 
-        self.inverse_list = self.list 
+        self.inverse_list = self.list
         out = list(range(len(self._image_index)))
 
-        for index,tmp in enumerate(self.roidb):
+        for index, tmp in enumerate(self.roidb):
             for j in tmp['gt_classes']:
                 if j in self.list:
                     out.remove(index)
@@ -406,6 +404,7 @@ class pascal_voc(imdb):
         for tmp in out:
             self._image_index.pop(tmp)
             self.roidb.pop(tmp)
+
 
 if __name__ == '__main__':
     d = pascal_voc('trainval', '2007')
