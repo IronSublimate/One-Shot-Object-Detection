@@ -99,7 +99,7 @@ class roibatchLoader(data.Dataset):
         self.filter(seen)
         self.probability()
 
-    def __getitem__(self, index: int):
+    def __getitem__(self, index: int) -> (torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, int):
         index_ratio = int(self.ratio_index[index])
 
         # get the anchor index for current sample index
@@ -288,7 +288,7 @@ class roibatchLoader(data.Dataset):
 
             return data, query, im_info, gt_boxes, choice
 
-    def load_query(self, choice, id=0):
+    def load_query(self, choice: int, id: int = 0):
 
         if self.training:
             # Random choice query catgory image

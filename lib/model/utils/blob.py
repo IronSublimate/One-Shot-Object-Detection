@@ -10,14 +10,15 @@
 import numpy as np
 # from imageio import imread, imresize
 import cv2
+from typing import List
 
 try:
-    xrange          # Python 2
+    xrange  # Python 2
 except NameError:
     xrange = range  # Python 3
 
 
-def im_list_to_blob(ims):
+def im_list_to_blob(ims: List[np.ndarray]):
     """Convert a list of images into a network input.
 
     Assumes images are already prepared (means subtracted, BGR order, ...).
@@ -32,21 +33,22 @@ def im_list_to_blob(ims):
 
     return blob
 
-def prep_im_for_blob(im, pixel_means, target_size, max_size):
+
+def prep_im_for_blob(im: np.ndarray, pixel_means: np.ndarray, target_size: int, max_size: int) \
+        -> (np.ndarray, float):
     """Mean subtract and scale an image for use in a blob."""
 
     im = im.astype(np.float32, copy=False)
     # changed to use pytorch models
-    im /= 255. # Convert range to [0,1]
+    im /= 255.  # Convert range to [0,1]
     # normalization for pytroch pretrained models.
     # https://pytorch.org/docs/stable/torchvision/models.html
     pixel_means = [0.485, 0.456, 0.406]
     pixel_stdens = [0.229, 0.224, 0.225]
-    
-    # normalize manual
-    im -= pixel_means # Minus mean    
-    im /= pixel_stdens # divide by stddev
 
+    # normalize manual
+    im -= pixel_means  # Minus mean
+    im /= pixel_stdens  # divide by stddev
 
     # im = im[:, :, ::-1]
     im_shape = im.shape
@@ -62,8 +64,8 @@ def prep_im_for_blob(im, pixel_means, target_size, max_size):
 
     return im, im_scale
 
-def crop(image, purpose, size):
 
+def crop(image: np.ndarray, purpose: List[float], size: int) -> np.ndarray:
     h, w, c = image.shape
 
     # add_h = int(purpose[4]-purpose[2])/5
@@ -74,15 +76,14 @@ def crop(image, purpose, size):
 
     # purpose[1] = int(purpose[1])-add_w if (int(purpose[1])-add_w >0) else 0
     # purpose[3] = int(purpose[3])+add_w if (int(purpose[3])+add_w <w) else w
-    cut_image = image[int(purpose[1]):int(purpose[3]),int(purpose[0]):int(purpose[2]),:]
-
+    cut_image = image[int(purpose[1]):int(purpose[3]), int(purpose[0]):int(purpose[2]), :]
 
     height, width = cut_image.shape[0:2]
 
-    max_hw   = max(height, width)
+    max_hw = max(height, width)
     cty, ctx = [height // 2, width // 2]
 
-    cropped_image  = np.zeros((max_hw, max_hw, 3), dtype=cut_image.dtype)
+    cropped_image = np.zeros((max_hw, max_hw, 3), dtype=cut_image.dtype)
 
     x0, x1 = max(0, ctx - max_hw // 2), min(ctx + max_hw // 2, width)
     y0, y1 = max(0, cty - max_hw // 2), min(cty + max_hw // 2, height)
@@ -95,5 +96,4 @@ def crop(image, purpose, size):
     x_slice = slice(cropped_ctx - left, cropped_ctx + right)
     cropped_image[y_slice, x_slice, :] = cut_image[y0:y1, x0:x1, :]
 
-
-    return cv2.resize(cropped_image, (size,size), interpolation=cv2.INTER_LINEAR)
+    return cv2.resize(cropped_image, (size, size), interpolation=cv2.INTER_LINEAR)
