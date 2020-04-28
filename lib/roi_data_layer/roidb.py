@@ -49,7 +49,7 @@ def prepare_roidb(imdb: imdb_):
         assert all(max_classes[nonzero_inds] != 0)
 
 
-def rank_roidb_ratio(roidb):
+def rank_roidb_ratio(roidb: List[Dict[str, Any]]) -> (np.ndarray, np.ndarray):
     # rank roidb based on the ratio between width and height.
     ratio_large = 2  # largest ratio to preserve.
     ratio_small = 0.5  # smallest ratio to preserve.
@@ -127,7 +127,8 @@ def test_rank_roidb_ratio(roidb, reserved):
     return ratio_list, ratio_index
 
 
-def combined_roidb(imdb_names: str, training=True, seen=1) -> List[Dict[str, Any]]:
+def combined_roidb(imdb_names: str, training=True, seen=1) \
+        -> (imdb_, List[Dict[str, Any]], np.ndarray, np.ndarray, List[Dict[int, Dict[str, Any]]]):
     """
     Combine multiple roidbs
     """
@@ -146,7 +147,8 @@ def combined_roidb(imdb_names: str, training=True, seen=1) -> List[Dict[str, Any
 
         return imdb.roidb
 
-    def get_roidb(imdb_name: str, training: bool) -> Tuple[imdb_, List[Dict[str, Any]], List[int], List[int]]:
+    def get_roidb(imdb_name: str, training: bool) -> \
+            (imdb_, List[Dict[str, Any]], List[Dict[int, Dict[str, Any]]], List[int]):
         imdb = get_imdb(imdb_name)
 
         print('Loaded dataset `{:s}` for training'.format(imdb.name))
