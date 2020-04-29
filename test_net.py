@@ -319,8 +319,8 @@ if __name__ == '__main__':
                                 box_deltas = box_deltas.view(-1, 4) * torch.FloatTensor(
                                     cfg.TRAIN.BBOX_NORMALIZE_STDS).cuda() \
                                              + torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_MEANS).cuda()
-                            else :
-                                box_deltas = box_deltas.view(-1, 4)\
+                            else:
+                                box_deltas = box_deltas.view(-1, 4) \
                                              * torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_STDS) \
                                              + torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_MEANS)
                             box_deltas = box_deltas.view(1, -1, 4 * len(imdb.classes))
@@ -393,8 +393,14 @@ if __name__ == '__main__':
                     (h, w, c) = im2show.shape
                     o_query = cv2.resize(o_query, (h, h), interpolation=cv2.INTER_LINEAR)
                     im2show = np.concatenate((im2show, o_query), axis=1)
-
-                    cv2.imwrite('./test_img/%d_d.png' % (i), im2show)
+                    im2show = np.round(im2show).astype(np.uint8)
+                    img_path = os.path.join(output_dir_vu, "test_img")
+                    if not os.path.exists(img_path):
+                        os.mkdir(img_path)
+                    cv2.imwrite(os.path.join(img_path, '%d_d.png' % (i)), im2show)
+                    # cv2.namedWindow("img", cv2.WINDOW_NORMAL)
+                    # cv2.imshow("img", im2show)
+                    # cv2.waitKey(0)
 
             with open(det_file, 'wb') as f:
                 pickle.dump(all_boxes, f, pickle.HIGHEST_PROTOCOL)
