@@ -15,6 +15,7 @@ from model.utils.config import cfg
 from roi_data_layer.minibatch import get_minibatch, get_minibatch
 from model.utils.blob import prep_im_for_blob, im_list_to_blob, crop
 from model.rpn.bbox_transform import bbox_transform_inv, clip_boxes
+from datasets.imdb import imdb
 
 import numpy as np
 import cv2
@@ -34,6 +35,7 @@ class roibatchLoader(data.Dataset):
                  num_classes: int,
                  training: bool = True,
                  normalize=None,
+                 m_imdb: Optional[imdb] = None,
                  seen: bool = True):
         self._roidb = roidb
         self._query = query
@@ -95,8 +97,11 @@ class roibatchLoader(data.Dataset):
         self._classes_inv = {
             value: key for key, value in self._classes.items()
         }
-
-        self.filter(seen)
+        if m_imdb:
+            self.list = m_imdb.list
+            self.list_ind = m_imdb.inverse_list
+        else:
+            self.filter(seen)
         self.probability()
 
     def __getitem__(self, index: int) -> (torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, int):

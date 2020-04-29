@@ -16,6 +16,7 @@ from datasets.coco import coco
 from datasets.imagenet import imagenet
 from datasets.vg import vg
 from datasets.imdb import imdb
+from datasets.in2_car import IN2Car
 
 import numpy as np
 
@@ -60,6 +61,11 @@ for split in ['train', 'val', 'val1', 'val2', 'test']:
     data_path = 'data/imagenet/ILSVRC'
     __sets[name] = (
         lambda split=split, devkit_path=devkit_path, data_path=data_path: imagenet(split, devkit_path, data_path))
+
+# Set up in2_car_<split>
+for split in ['train', 'test']:
+    name = f'in2_car_{split}'
+    __sets[name] = (lambda split=split: IN2Car(split))
 
 
 def get_imdb(name: str) -> imdb:

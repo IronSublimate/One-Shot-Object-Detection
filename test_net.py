@@ -158,6 +158,10 @@ if __name__ == '__main__':
         args.imdb_name = "vg_150-50-50_minitrain"
         args.imdbval_name = "vg_150-50-50_minival"
         args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]']
+    elif args.dataset == "in2_car":
+        args.imdb_name = "in2_car_train"
+        args.imdbval_name = "in2_car_test"
+        args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]']
 
     args.cfg_file = "cfgs/{}_{}.yml".format(args.net, args.group) if args.group != 0 else "cfgs/{}.yml".format(args.net)
 
@@ -174,9 +178,11 @@ if __name__ == '__main__':
     imdb_vu, roidb_vu, ratio_list_vu, ratio_index_vu, query_vu = combined_roidb(args.imdbval_name, False,
                                                                                 seen=args.seen)
     imdb_vu.competition_mode(on=True)
-    cfg.test_categories = imdb_vu.list
+    # cfg.test_categories = imdb_vu.list
     dataset_vu = roibatchLoader(roidb_vu, ratio_list_vu, ratio_index_vu, query_vu, 1, imdb_vu.num_classes,
-                                training=False, seen=args.seen)
+                                training=False, seen=args.seen, m_imdb=imdb_vu)
+    assert dataset_vu.list == imdb_vu.list, (dataset_vu.list, imdb_vu.list)
+    assert dataset_vu.list_ind == imdb_vu.inverse_list, (dataset_vu.list, imdb.list)
 
     # initilize the network here.
     if args.net == 'vgg16':
@@ -200,7 +206,10 @@ if __name__ == '__main__':
     load_name = os.path.join(input_dir,
                              'faster_rcnn_{}_{}_{}.pth'.format(args.checksession, args.checkepoch, args.checkpoint))
     print("load checkpoint %s" % (load_name))
-    checkpoint = torch.load(load_name)
+    if args.cuda:
+        checkpoint = torch.load(load_name)
+    else:
+        checkpoint = torch.load(load_name, map_location=torch.device('cpu'))
     fasterRCNN.load_state_dict(checkpoint['model'])
     if 'pooling_mode' in checkpoint.keys():
         cfg.POOLING_MODE = checkpoint['pooling_mode']
@@ -296,14 +305,24 @@ if __name__ == '__main__':
                     if cfg.TRAIN.BBOX_NORMALIZE_TARGETS_PRECOMPUTED:
                         # Optionally normalize targets by a precomputed mean and stdev
                         if args.class_agnostic:
-                            box_deltas = box_deltas.view(-1, 4) * torch.FloatTensor(
-                                cfg.TRAIN.BBOX_NORMALIZE_STDS).cuda() \
-                                         + torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_MEANS).cuda()
+                            if args.cuda:
+                                box_deltas = box_deltas.view(-1, 4) * torch.FloatTensor(
+                                    cfg.TRAIN.BBOX_NORMALIZE_STDS).cuda() \
+                                             + torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_MEANS).cuda()
+                            else:
+                                box_deltas = box_deltas.view(-1, 4) \
+                                             * torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_STDS) \
+                                             + torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_MEANS)
                             box_deltas = box_deltas.view(1, -1, 4)
                         else:
-                            box_deltas = box_deltas.view(-1, 4) * torch.FloatTensor(
-                                cfg.TRAIN.BBOX_NORMALIZE_STDS).cuda() \
-                                         + torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_MEANS).cuda()
+                            if args.cuda:
+                                box_deltas = box_deltas.view(-1, 4) * torch.FloatTensor(
+                                    cfg.TRAIN.BBOX_NORMALIZE_STDS).cuda() \
+                                             + torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_MEANS).cuda()
+                            else :
+                                box_deltas = box_deltas.view(-1, 4)\
+                                             * torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_STDS) \
+                                             + torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_MEANS)
                             box_deltas = box_deltas.view(1, -1, 4 * len(imdb.classes))
 
                     pred_boxes = bbox_transform_inv(boxes, box_deltas, 1)
