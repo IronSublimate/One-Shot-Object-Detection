@@ -19,10 +19,11 @@ import time
 import pdb
 from model.utils.net_utils import _smooth_l1_loss, _crop_pool_layer, _affine_grid_gen, _affine_theta
 from model.utils.net_utils import *
+from typing import Tuple
 
 
 class match_block(nn.Module):
-    def __init__(self, inplanes):
+    def __init__(self, inplanes: int):
         super(match_block, self).__init__()
 
         self.sub_sample = False
@@ -71,8 +72,8 @@ class match_block(nn.Module):
         self.ChannelGate = ChannelGate(self.in_channels)
         self.globalAvgPool = nn.AdaptiveAvgPool2d(1)
 
-    def forward(self, detect, aim):
-
+    def forward(self, detect: torch.Tensor, aim: torch.Tensor) \
+            -> (torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor):
         batch_size, channels, height_a, width_a = aim.shape
         batch_size, channels, height_d, width_d = detect.shape
 
@@ -122,7 +123,7 @@ class match_block(nn.Module):
 class OneShotBase(nn.Module):
     """ faster RCNN """
 
-    def __init__(self, classes, class_agnostic):
+    def __init__(self, classes: Tuple[str], class_agnostic: bool):
         super(OneShotBase, self).__init__()
         self.classes = classes
         self.n_classes = len(classes)
@@ -261,3 +262,6 @@ class OneShotBase(nn.Module):
     def create_architecture(self):
         self._init_modules()
         self._init_weights()
+
+    def _head_to_tail(self, pool5):
+        raise NotImplementedError
