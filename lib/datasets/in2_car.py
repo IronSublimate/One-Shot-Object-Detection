@@ -381,25 +381,15 @@ class IN2Car(imdb):
         # if want to use test_categories , seen = 2
         # if want to use both            , seen = 3
         self.list = [self.coco_class_ind_to_cat_id[cat] for cat in range(1, 3)]
-        '''
+
         if seen == 1:
-            self.list = cfg.train_categories
-            # Group number to class
-            if len(self.list) == 1:
-                self.list = [self.coco_class_ind_to_cat_id[cat] for cat in range(1, 3) if cat % 4 != self.list[0]]
+            self.list = [self.coco_class_ind_to_cat_id[1]]
 
         elif seen == 2:
-            self.list = cfg.test_categories
-            # Group number to class
-            if len(self.list) == 1:
-                self.list = [self.coco_class_ind_to_cat_id[cat] for cat in range(1, 3) if cat % 4 == self.list[0]]
+            self.list = [self.coco_class_ind_to_cat_id[2]]
 
         elif seen == 3:
-            self.list = cfg.train_categories + cfg.test_categories
-            # Group number to class
-            if len(self.list) == 2:
-                self.list = [self.coco_class_ind_to_cat_id[cat] for cat in range(1, 3)]
-        '''
+            self.list = [self.coco_class_ind_to_cat_id[cat] for cat in range(1, 3)]
 
         # Transfer categories id to class indices
         self.inverse_list = [self.coco_cat_id_to_class_ind[i] for i in self.list]
