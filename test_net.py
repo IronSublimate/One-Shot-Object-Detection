@@ -269,14 +269,15 @@ if __name__ == '__main__':
                      for _ in xrange(imdb_vu.num_classes)]
 
         _t = {'im_detect': time.time(), 'misc': time.time()}
-        if args.group != 0:
-            det_file = os.path.join(output_dir_vu,
-                                    'sess%d_g%d_seen%d_%d.pkl' % (args.checksession, args.group, args.seen, avg))
-        else:
-            det_file = os.path.join(output_dir_vu, 'sess%d_seen%d_%d.pkl' % (args.checksession, args.seen, avg))
-        print(det_file)
+        # if args.group != 0:
+        #     det_file = os.path.join(output_dir_vu,
+        #                             'sess%d_g%d_seen%d_%d.pkl' % (args.checksession, args.group, args.seen, avg))
+        # else:
+        #     det_file = os.path.join(output_dir_vu, 'sess%d_seen%d_%d.pkl' % (args.checksession, args.seen, avg))
+        # print(det_file)
 
-        if os.path.exists(det_file):
+        # if os.path.exists(det_file):
+        if False:
             with open(det_file, 'rb') as fid:
                 all_boxes = pickle.load(fid)
         else:
@@ -402,8 +403,8 @@ if __name__ == '__main__':
                     # cv2.imshow("img", im2show)
                     # cv2.waitKey(0)
 
-            with open(det_file, 'wb') as f:
-                pickle.dump(all_boxes, f, pickle.HIGHEST_PROTOCOL)
+            # with open(det_file, 'wb') as f:
+            #     pickle.dump(all_boxes, f, pickle.HIGHEST_PROTOCOL)
 
         print('Evaluating detections')
         imdb_vu.evaluate_detections(all_boxes, output_dir_vu)
